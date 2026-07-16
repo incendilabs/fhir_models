@@ -1,4 +1,5 @@
 require 'fhir_models'
+require 'digest'
 namespace :fhir do
   desc 'console'
   task :console, [] do |_t, _args|
@@ -18,6 +19,40 @@ namespace :fhir do
     # 4. generate extensions?
 
     # 5. generate profiles?
+    if generator.missing_required_expansion
+      FHIR.logger.error 'MISSING REQUIRED EXPANSION(S) -- This is a fatal error in the definition files.'
+    elsif generator.missing_expansions
+      FHIR.logger.info 'Missing expansions can be safely ignored due to weak binding strengths.'
+    end
+  end
+
+  desc 'generate R4B models from official JSON definition and expansion artifacts'
+  task :generate_r4b, [:archive, :expansions] do |_t, args|
+    archive = args[:archive] || ENV['R4B_DEFINITIONS']
+    expansions = args[:expansions] || ENV['R4B_EXPANSIONS']
+    raise ArgumentError, 'Provide the R4B definitions archive path' if archive.nil? || archive.empty?
+    raise ArgumentError, 'Provide the R4B expansions bundle path' if expansions.nil? || expansions.empty?
+
+    definitions_checksum = Digest::SHA256.file(archive).hexdigest
+    unless definitions_checksum == FHIR::R4B::DEFINITIONS_SHA256
+      raise ArgumentError, "Unexpected R4B definitions archive checksum: #{definitions_checksum}"
+    end
+    expansions_checksum = Digest::SHA256.file(expansions).hexdigest
+    unless expansions_checksum == FHIR::R4B::EXPANSIONS_SHA256
+      raise ArgumentError, "Unexpected R4B expansions bundle checksum: #{expansions_checksum}"
+    end
+
+    definitions = FHIR::Boot::JsonDefinitions.new(archive, expansions: expansions)
+    generator = FHIR::Boot::Generator.new(
+      true,
+      definitions: definitions,
+      namespace: 'FHIR::R4B',
+      output_directory: 'r4b'
+    )
+    generator.generate_metadata
+    generator.generate_types
+    generator.generate_resources
+
     if generator.missing_required_expansion
       FHIR.logger.error 'MISSING REQUIRED EXPANSION(S) -- This is a fatal error in the definition files.'
     elsif generator.missing_expansions

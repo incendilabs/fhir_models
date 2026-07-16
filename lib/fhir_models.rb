@@ -16,12 +16,22 @@ Dir.glob(File.join(root, 'lib', 'fhir_models', 'bootstrap', '**', '*.rb')).each 
 end
 
 require File.join(root, 'lib', 'fhir_models', 'fhir.rb')
+require File.join(root, 'lib', 'fhir_models', 'r4b.rb')
 
 # Require the generated code
 Dir.glob(File.join(root, 'lib', 'fhir_models', 'fhir', '*.rb')).each do |file|
   require file
 end
 Dir.glob(File.join(root, 'lib', 'fhir_models', 'fhir', '**', '*.rb')).each do |file|
+  require file
+end
+
+# Require the generated R4B code
+require File.join(root, 'lib', 'fhir_models', 'r4b', 'metadata.rb')
+Dir.glob(File.join(root, 'lib', 'fhir_models', 'r4b', 'types', '*.rb')).sort.each do |file|
+  require file
+end
+Dir.glob(File.join(root, 'lib', 'fhir_models', 'r4b', 'resources', '*.rb')).sort.each do |file|
   require file
 end
 
