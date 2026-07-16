@@ -11,8 +11,9 @@ module FHIR
       attr_accessor :fields
       attr_accessor :templates
       attr_accessor :top_level
+      attr_accessor :namespace
 
-      def initialize(name = ['Template'], top_level = false)
+      def initialize(name = ['Template'], top_level = false, namespace: 'FHIR')
         @name = name
         @hierarchy = []
         @kind = nil
@@ -20,6 +21,7 @@ module FHIR
         @fields = []
         @templates = []
         @top_level = top_level
+        @namespace = namespace
       end
 
       def metadata
@@ -48,23 +50,28 @@ module FHIR
         # create an array of Strings, one per line
         s = []
         # TODO: insert copyright statement
-        # always declare the FHIR module
-        s << 'module FHIR' if @top_level
+        namespace_parts = @namespace.split('::')
+        if @top_level
+          namespace_parts.each_with_index do |part, index|
+            s << "#{indent(index)}module #{part}"
+          end
+        end
+        namespace_depth = @top_level ? namespace_parts.length : 1
 
         @name.each_with_index do |name, index|
-          space = indent(index + 1, offset)
+          space = indent(index + namespace_depth, offset)
           type = 'module'
           type = 'class' if index == @name.length - 1
           classdef = "#{space}#{type} #{name}"
-          classdef += ' < FHIR::Model' if type == 'class'
+          classdef += " < #{@namespace}::Model" if type == 'class'
           s << classdef
         end
 
         # include modules
-        space = indent(@name.length + 1, offset)
-        s << "#{space}include FHIR::Hashable" unless @name.empty?
-        s << "#{space}include FHIR::Json" unless @name.empty?
-        s << "#{space}include FHIR::Xml" unless @name.empty?
+        space = indent(@name.length + namespace_depth, offset)
+        s << "#{space}include #{@namespace}::Hashable" unless @name.empty?
+        s << "#{space}include #{@namespace}::Json" unless @name.empty?
+        s << "#{space}include #{@namespace}::Xml" unless @name.empty?
         s << ''
 
         # add mandatory METADATA constant
@@ -122,10 +129,14 @@ module FHIR
 
         # close all the class and module declarations
         (0..@name.length - 1).reverse_each do |index|
-          space = indent(index + 1, offset)
+          space = indent(index + namespace_depth, offset)
           s << "#{space}end"
         end
-        s << 'end' if @top_level
+        if @top_level
+          namespace_parts.length.times do |index|
+            s << "#{indent(namespace_parts.length - index - 1)}end"
+          end
+        end
         s.join("\n")
       end
 

@@ -4,6 +4,7 @@ require File.join(root, 'lib', 'fhir_models', 'version')
 require File.join(root, 'lib', 'fhir_models', 'deprecate')
 
 # Need to require Hashable first
+require File.join(root, 'lib', 'fhir_models', 'bootstrap', 'namespace.rb')
 require File.join(root, 'lib', 'fhir_models', 'bootstrap', 'hashable.rb')
 require File.join(root, 'lib', 'fhir_models', 'bootstrap', 'json.rb')
 

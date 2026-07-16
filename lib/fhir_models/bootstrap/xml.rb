@@ -19,6 +19,7 @@ module FHIR
     # Hash keys are ordered in Ruby 1.9 and later, so we can rely on their order
     # to be the correct order for the XML serialization.
     def hash_to_xml_node(name, hash, doc)
+      resources = fhir_namespace::RESOURCES
       node = Nokogiri::XML::Node.new(name, doc)
 
       # if hash contains resourceType
@@ -34,7 +35,7 @@ module FHIR
 
       hash.each do |key, value|
         next if %w[extension modifierExtension].include?(name) && key == 'url'
-        next if key == 'id' && !FHIR::RESOURCES.include?(name)
+        next if key == 'id' && !resources.include?(name)
         if value.is_a?(Hash)
           node.add_child(hash_to_xml_node(key, value, doc))
         elsif value.is_a?(Array)
@@ -63,20 +64,20 @@ module FHIR
         end
       end
       node.set_attribute('url', hash['url']) if %w[extension modifierExtension].include?(name)
-      node.set_attribute('id', hash['id']) if hash['id'] && !FHIR::RESOURCES.include?(name)
+      node.set_attribute('id', hash['id']) if hash['id'] && !resources.include?(name)
       node
     end
 
-    def self.from_xml(xml)
+    def self.from_xml(xml, namespace = FHIR)
       doc = Nokogiri::XML(xml)
       doc.root.add_namespace_definition('f', 'http://hl7.org/fhir')
       doc.root.add_namespace_definition('x', 'http://www.w3.org/1999/xhtml')
-      hash = xml_node_to_hash(doc.root)
+      hash = xml_node_to_hash(doc.root, namespace)
 
       resource = nil
       begin
         resource_type = doc.root.name
-        klass = Module.const_get("FHIR::#{resource_type}")
+        klass = namespace.const_get(resource_type)
         resource = klass.new(hash)
       rescue => ex
         FHIR.logger.error("Failed to deserialize XML:\n#{ex.backtrace}")
@@ -86,7 +87,7 @@ module FHIR
       resource
     end
 
-    def self.xml_node_to_hash(node)
+    def self.xml_node_to_hash(node, namespace = FHIR)
       hash = {}
       node.children.each do |child|
         next if [Nokogiri::XML::Text, Nokogiri::XML::Comment].include?(child.class)
@@ -97,7 +98,7 @@ module FHIR
         else
           value = child.get_attribute('value')
           if value.nil? && !child.children.empty?
-            value = xml_node_to_hash(child)
+            value = xml_node_to_hash(child, namespace)
           end
 
           if hash[key]
@@ -110,12 +111,12 @@ module FHIR
       end
       hash['url'] = node.get_attribute('url') if %w[extension modifierExtension].include?(node.name)
       hash['id'] = node.get_attribute('id') if node.get_attribute('id') # Testscript fixture ids (applies to any BackboneElement)
-      hash['resourceType'] = node.name if FHIR::RESOURCES.include?(node.name)
+      hash['resourceType'] = node.name if namespace::RESOURCES.include?(node.name)
 
       # If this hash contains nothing but an embedded resource, we should return that
       # embedded resource without the wrapper
       if hash.keys.length == 1 &&
-         FHIR::RESOURCES.include?(hash.keys.first) &&
+         namespace::RESOURCES.include?(hash.keys.first) &&
          hash.values.first.is_a?(Hash) &&
          hash.values.first['resourceType'] == hash.keys.first
         hash.values.first

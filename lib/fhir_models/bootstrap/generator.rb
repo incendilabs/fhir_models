@@ -8,10 +8,14 @@ module FHIR
       # templates keeps track of all the templates in context within a given StructureDefinition
       attr_accessor :templates
       attr_accessor :missing_expansions, :missing_required_expansion
+      attr_accessor :namespace, :output_directory
 
-      def initialize(auto_setup: true)
+      def initialize(auto_setup = true, definitions: FHIR::Definitions, namespace: 'FHIR', output_directory: 'fhir', **options)
+        auto_setup = options[:auto_setup] if options.key?(:auto_setup)
         # load the valueset expansions
-        @defn = FHIR::Definitions
+        @defn = definitions
+        @namespace = namespace
+        @output_directory = output_directory
         # templates is an array
         @templates = []
         setup if auto_setup
@@ -20,17 +24,18 @@ module FHIR
       def setup
         # make folders for generated content if they do not exist
         @lib = File.expand_path '..', File.dirname(File.absolute_path(__FILE__))
-        Dir.mkdir(File.join(@lib, 'fhir')) unless Dir.exist?(File.join(@lib, 'fhir'))
-        Dir.mkdir(File.join(@lib, 'fhir', 'types')) unless Dir.exist?(File.join(@lib, 'fhir', 'types'))
-        Dir.mkdir(File.join(@lib, 'fhir', 'resources')) unless Dir.exist?(File.join(@lib, 'fhir', 'resources'))
+        @output = File.expand_path(@output_directory, @lib)
+        Dir.mkdir(@output) unless Dir.exist?(@output)
+        Dir.mkdir(File.join(@output, 'types')) unless Dir.exist?(File.join(@output, 'types'))
+        Dir.mkdir(File.join(@output, 'resources')) unless Dir.exist?(File.join(@output, 'resources'))
 
         # delete previously generated folder contents
-        Dir.glob(File.join(@lib, 'fhir', '*')).each { |f| File.delete(f) unless File.directory?(f) }
-        Dir.glob(File.join(@lib, 'fhir', '**', '*')).each { |f| File.delete(f) unless File.directory?(f) }
+        Dir.glob(File.join(@output, '*')).each { |f| File.delete(f) unless File.directory?(f) }
+        Dir.glob(File.join(@output, '**', '*')).each { |f| File.delete(f) unless File.directory?(f) }
       end
 
       def generate_metadata
-        template = FHIR::Boot::Template.new([], true)
+        template = FHIR::Boot::Template.new([], true, namespace: @namespace)
 
         primitives = @defn.primitive_types
         hash = {}
@@ -59,14 +64,14 @@ module FHIR
         # resources
         template.constants['RESOURCES'] = @defn.resource_definitions.map { |r| r['id'] }
 
-        filename = File.join(@lib, 'fhir', 'metadata.rb')
+        filename = File.join(@output, 'metadata.rb')
         file = File.open(filename, 'w:UTF-8')
         file.write(template.to_s)
         file.close
       end
 
       def generate_types
-        folder = File.join @lib, 'fhir', 'types'
+        folder = File.join @output, 'types'
         # complex data types start with an uppercase letter
         # and we'll filter out profiles on types (for example, Age is a profile on Quantity)
         complex_types = @defn.complex_types
@@ -74,7 +79,7 @@ module FHIR
       end
 
       def generate_resources
-        folder = File.join @lib, 'fhir', 'resources'
+        folder = File.join @output, 'resources'
         generate_class_files(folder, @defn.resource_definitions)
       end
 
@@ -104,7 +109,7 @@ module FHIR
         path_type = type_name
         path_type = constrained_type if constrained_type
 
-        template = FHIR::Boot::Template.new([type_name], top_level)
+        template = FHIR::Boot::Template.new([type_name], top_level, namespace: @namespace)
         template.hierarchy = hierarchy
         template.kind = structure_def['kind']
         return template if structure_def['snapshot'].nil? || structure_def['snapshot']['element'].nil?
