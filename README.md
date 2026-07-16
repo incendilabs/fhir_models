@@ -1,6 +1,6 @@
 # fhir_models [![Build Status](https://api.travis-ci.org/fhir-crucible/fhir_models.svg?branch=master)](https://travis-ci.org/fhir-crucible/fhir_models)
 
-FHIR R4 Resource models generated from FHIR StructureDefinitions.
+FHIR R4 and R4B Resource models generated from FHIR StructureDefinitions.
 
 The StructureDefinitions, XML Schemas, and examples are reused from the [HL7 FHIR build tools](https://github.com/HL7/fhir).
 
@@ -11,7 +11,8 @@ $ bundle exec rake fhir:console
 ```
 
 ### Features
-- FHIR R4 Resource Models
+- FHIR R4 Resource Models under `FHIR`
+- FHIR R4B Resource Models under `FHIR::R4B`
 - XML and JSON support
 - Resource Validation
 - Not Supported
@@ -32,6 +33,30 @@ $ bundle exec rake fhir:console
   patient = FHIR.from_contents(json)
   puts patient.to_json
   ```
+
+  Parsing R4B content uses the explicit R4B namespace...
+  ```ruby
+  patient = FHIR::R4B.from_contents(json)
+  puts patient.to_json
+  ```
+
+### Generating R4B Models
+
+Generate the R4B models from the pinned FHIR 4.3.0 JSON definition archive and
+ValueSet expansion bundle:
+
+- [R4B definitions.json.zip](https://www.hl7.org/fhir/R4B/definitions.json.zip)
+- [R4B expansions.json](https://www.hl7.org/fhir/R4B/expansions.json)
+
+```shell
+bundle exec rake "fhir:generate_r4b[path/to/r4b-definitions.json.zip,path/to/expansions.json]"
+```
+
+The expected definition archive SHA-256 is
+`a2793a06853c2d4540db8a72fc1c6d972528b01d113c2bb70ae2d80dc062e963` and the
+expected expansion bundle SHA-256 is
+`fe10ca33f0de85c16b367cb57092076d7e2fbd7aff6479c8862a32bd227e3b07`.
+Generated metadata, types, and resources are written to `lib/fhir_models/r4b`.
 
   Creating an `Observation` by hand...
   ```ruby
