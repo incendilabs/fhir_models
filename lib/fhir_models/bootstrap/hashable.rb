@@ -42,6 +42,8 @@ module FHIR
     end
 
     def from_hash(hash)
+      namespace = fhir_namespace
+      primitives = namespace::PRIMITIVES
       # eliminate empty stuff
       hash = prune(hash) unless hash.empty?
       # clear the existing variables
@@ -64,7 +66,7 @@ module FHIR
           nil
         end
         # inflate the value if it isn't a primitive
-        klass = FHIR::PRIMITIVES.key?(meta['type']) ? nil : FHIR.const_get(meta['type'])
+        klass = primitives.key?(meta['type']) ? nil : namespace.const_get(meta['type'])
         if !klass.nil? && !value.nil?
           # handle array of objects
           if value.is_a?(Array)
@@ -75,7 +77,7 @@ module FHIR
             value = [value] if value && (meta['max'] > 1)
           end
           instance_variable_set("@#{local_name}", value)
-        elsif !FHIR::PRIMITIVES.include?(meta['type']) && meta['type'] != 'xhtml'
+        elsif !primitives.include?(meta['type']) && meta['type'] != 'xhtml'
           FHIR.logger.error("Unhandled and unrecognized class/type: #{meta['type']}")
         elsif value.is_a?(Array)
           # array of primitives
@@ -96,8 +98,9 @@ module FHIR
       return child if child.is_a?(FHIR::Model)
 
       if child['resourceType'] && !klass::METADATA['resourceType']
+        namespace = fhir_namespace
         klass = begin
-          FHIR.const_get(child['resourceType'])
+          namespace.const_get(child['resourceType'])
         rescue => _exception
           # TODO: this appears to be a dead code branch
           # TODO: should this log / re-raise the exception if encountered instead of silently swallowing it?
@@ -120,7 +123,7 @@ module FHIR
       rval = value
       if meta['type'] == 'boolean'
         rval = value.strip == 'true'
-      elsif FHIR::PRIMITIVES.include?(meta['type'])
+      elsif fhir_namespace::PRIMITIVES.include?(meta['type'])
         if %w[decimal integer positiveInt unsignedInt].include?(meta['type'])
           rval = BigDecimal(value.to_s)
           rval = rval.frac.zero? ? rval.to_i : rval.to_f
@@ -129,6 +132,10 @@ module FHIR
       rval
     end
 
-    private :prune, :make_child, :convert_primitive
+    def fhir_namespace
+      FHIR.namespace_for(self.class)
+    end
+
+    private :prune, :make_child, :convert_primitive, :fhir_namespace
   end
 end

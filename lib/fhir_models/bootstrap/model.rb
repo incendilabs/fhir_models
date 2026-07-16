@@ -59,7 +59,7 @@ module FHIR
     end
 
     def to_reference
-      FHIR::Reference.new(reference: "#{self.class.name.split('::').last}/#{id}")
+      fhir_namespace.const_get(:Reference).new(reference: "#{self.class.name.split('::').last}/#{id}")
     end
 
     def equals?(other, exclude = [])
@@ -180,11 +180,12 @@ module FHIR
       end
       # check datatype
       datatype = meta['type']
+      namespace = fhir_namespace
       value.each do |v|
-        klassname = v.class.name.gsub('FHIR::', '')
+        klassname = v.class.name.sub(/^#{Regexp.escape(namespace.name)}::/, '')
         # if the data type is a generic Resource, validate it
         if datatype == 'Resource'
-          if FHIR::RESOURCES.include?(klassname)
+          if namespace::RESOURCES.include?(klassname)
             validation = v.validate(contained_here)
             errors[field] << validation unless validation.empty?
           else
@@ -201,7 +202,7 @@ module FHIR
             errors[field] << "#{meta['path']}: expected Reference, found #{klassname}"
           end
         # if the data type is a particular resource or complex type or BackBone element within this resource
-        elsif FHIR::RESOURCES.include?(datatype) || FHIR::TYPES.include?(datatype) || v.class.name.start_with?(self.class.name)
+        elsif namespace::RESOURCES.include?(datatype) || namespace::TYPES.include?(datatype) || v.class.name.start_with?(self.class.name)
           if datatype == klassname
             validation = v.validate(contained_here)
             errors[field] << validation unless validation.empty?
@@ -209,13 +210,13 @@ module FHIR
             errors[field] << "#{meta['path']}: incorrect type. Found #{klassname} expected #{datatype}"
           end
         # if the data type is a primitive, test the regular expression (if any)
-        elsif FHIR::PRIMITIVES.include?(datatype)
-          primitive_meta = FHIR::PRIMITIVES[datatype]
+        elsif namespace::PRIMITIVES.include?(datatype)
+          primitive_meta = namespace::PRIMITIVES[datatype]
           if primitive_meta['regex'] && primitive_meta['type'] != 'number'
             match = (v.to_s =~ Regexp.new(primitive_meta['regex']))
             errors[field] << "#{meta['path']}: #{v} does not match #{datatype} regex" if match.nil?
           else
-            errors[field] << "#{meta['path']}: #{v} is not a valid #{datatype}" unless FHIR.primitive?(datatype: datatype, value: v)
+            errors[field] << "#{meta['path']}: #{v} is not a valid #{datatype}" unless namespace.primitive?(datatype: datatype, value: v)
           end
         end
         # check binding
