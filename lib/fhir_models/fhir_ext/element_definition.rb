@@ -1,6 +1,6 @@
 module FHIR
   # Extend ElementDefinition for profile validation code
-  class ElementDefinition < FHIR::Model
+  module ElementDefinitionBehavior
     # children is used to hierarchically arrange elements
     # so profile validation is easier to compute
     attr_accessor :children
@@ -47,3 +47,6 @@ module FHIR
     end
   end
 end
+
+FHIR::ElementDefinition.include(FHIR::ElementDefinitionBehavior)
+FHIR::R4B::ElementDefinition.include(FHIR::ElementDefinitionBehavior)

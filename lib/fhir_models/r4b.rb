@@ -9,6 +9,13 @@ module FHIR
     class Model < FHIR::Model
     end
 
+    class Definitions < FHIR::Boot::DefinitionProvider
+      configure(
+        root: File.expand_path('definitions/r4b', __dir__),
+        namespace: FHIR::R4B
+      )
+    end
+
     module Json
       include FHIR::Json
 
