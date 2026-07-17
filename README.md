@@ -47,19 +47,25 @@ ValueSet expansion bundle:
 
 - [R4B definitions.json.zip](https://www.hl7.org/fhir/R4B/definitions.json.zip)
 - [R4B expansions.json](https://www.hl7.org/fhir/R4B/expansions.json)
+- [R4B fhir-all-xsd.zip](https://www.hl7.org/fhir/R4B/fhir-all-xsd.zip)
 
 ```shell
 bundle exec rake "fhir:generate_r4b[path/to/r4b-definitions.json.zip,path/to/expansions.json]"
+bundle exec rake "fhir:generate_r4b_schema[path/to/r4b-fhir-all-xsd.zip]"
 ```
 
 The expected definition archive SHA-256 is
 `a2793a06853c2d4540db8a72fc1c6d972528b01d113c2bb70ae2d80dc062e963` and the
 expected expansion bundle SHA-256 is
-`fe10ca33f0de85c16b367cb57092076d7e2fbd7aff6479c8862a32bd227e3b07`.
+`fe10ca33f0de85c16b367cb57092076d7e2fbd7aff6479c8862a32bd227e3b07`, and the
+expected schema archive SHA-256 is
+`3528d4ff44c69f2908d6159367d58b9d12fb41a48d1be3ec897947129696e6b4`.
 Generated metadata, types, and resources are written to `lib/fhir_models/r4b`.
 Preprocessed runtime definition bundles and version metadata are written to
 `lib/fhir_models/definitions/r4b` and are checked into the repository. The
-downloaded source archive and expansion bundle are not checked in.
+preprocessed schema set is written to
+`lib/fhir_models/definitions/r4b/schema`. Downloaded source artifacts are not
+checked in.
 
   Creating an `Observation` by hand...
   ```ruby

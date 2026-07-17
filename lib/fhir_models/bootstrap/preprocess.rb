@@ -112,7 +112,8 @@ module FHIR
 
         # Output the post processed file
         f = File.open(filename, 'w:UTF-8')
-        f.write(doc.to_xml)
+        output = doc.to_xml.lines.map(&:rstrip).join("\n")
+        f.write("#{output}\n")
         f.close
         finish = File.size(filename)
         puts "  Removed #{(start - finish) / 1024} KB" if start != finish

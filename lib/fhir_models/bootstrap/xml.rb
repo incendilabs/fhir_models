@@ -130,9 +130,9 @@ module FHIR
     end
     deprecate :is_valid?, :valid?
 
-    def self.validate(xml)
-      defns = File.expand_path '../definitions/schema', File.dirname(File.absolute_path(__FILE__))
-      schema = File.join(defns, 'fhir-all.xsd')
+    def self.validate(xml, schema_root = nil)
+      schema_root ||= File.expand_path '../definitions/schema', File.dirname(File.absolute_path(__FILE__))
+      schema = File.join(schema_root, 'fhir-all.xsd')
       xsd = Nokogiri::XML::Schema(File.new(schema))
       xsd.validate(Nokogiri::XML(xml))
     end
