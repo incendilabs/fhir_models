@@ -4,8 +4,7 @@ require 'yaml'
 require 'bcp47'
 
 module FHIR
-  class StructureDefinition
-    extend FHIR::Deprecate
+  module StructureDefinitionBehavior
     attr_accessor :finding
     attr_accessor :errors
     attr_accessor :warnings
@@ -15,18 +14,29 @@ module FHIR
     #                            Profile Validation
     # -------------------------------------------------------------------------
 
-    class << self; attr_accessor :vs_validators end
-    @vs_validators = {}
-    def self.validates_vs(valueset_uri, &validator_fn)
-      @vs_validators[valueset_uri] = validator_fn
+    module ClassMethods
+      attr_accessor :vs_validators
+
+      def validates_vs(valueset_uri, &validator_fn)
+        @vs_validators[valueset_uri] = validator_fn
+      end
+
+      def clear_validates_vs(valueset_uri)
+        @vs_validators.delete valueset_uri
+      end
+
+      def clear_all_validates_vs
+        @vs_validators = {}
+      end
     end
 
-    def self.clear_validates_vs(valueset_uri)
-      @vs_validators.delete valueset_uri
-    end
-
-    def self.clear_all_validates_vs
-      @vs_validators = {}
+    def self.included(base)
+      base.extend(ClassMethods)
+      base.extend(FHIR::Deprecate)
+      base.vs_validators = {}
+      base.deprecate :is_valid_json?, :valid_json?
+      base.deprecate :is_data_type?, :data_type?
+      base.deprecate :is_some_type_of_xml_or_json, :some_type_of_xml_or_json?
     end
 
     def validates_resource?(resource)
@@ -71,7 +81,6 @@ module FHIR
 
       @errors.size.zero?
     end
-    deprecate :is_valid_json?, :valid_json?
 
     def build_hierarchy
       @hierarchy = nil
@@ -312,8 +321,9 @@ module FHIR
     # value == the representation of the value
     def data_type?(data_type_code, value)
       # FHIR models covers any base Resources
-      if FHIR::RESOURCES.include?(data_type_code)
-        definition = FHIR::Definitions.resource_definition(data_type_code)
+      namespace = definition_namespace
+      if namespace.const_get(:RESOURCES).include?(data_type_code)
+        definition = definitions.resource_definition(data_type_code)
         unless definition.nil?
           ret_val = false
           begin
@@ -337,7 +347,7 @@ module FHIR
         true # we don't have to verify domain resource, because it will be included in the snapshot
       when 'resource'
         resource_type = value['resourceType']
-        definition = FHIR::Definitions.resource_definition(resource_type)
+        definition = definitions.resource_definition(resource_type)
         if !definition.nil?
           ret_val = false
           begin
@@ -356,14 +366,14 @@ module FHIR
           @errors << "Unable to find base Resource definition: #{resource_type}"
           false
         end
-      when *FHIR::PRIMITIVES.keys.map(&:downcase)
-        FHIR.primitive?(datatype: data_type_code, value: value)
+      when *namespace.const_get(:PRIMITIVES).keys.map(&:downcase)
+        namespace.primitive?(datatype: data_type_code, value: value)
       else
         # Eliminate endless loop on Element is an Element
         return true if data_type_code == 'Element' && id == 'Element'
 
-        definition = FHIR::Definitions.type_definition(data_type_code)
-        definition = FHIR::Definitions.resource_definition(data_type_code) if definition.nil?
+        definition = definitions.type_definition(data_type_code)
+        definition = definitions.resource_definition(data_type_code) if definition.nil?
         if !definition.nil?
           ret_val = false
           begin
@@ -384,7 +394,6 @@ module FHIR
         end
       end
     end
-    deprecate :is_data_type?, :data_type?
 
     def check_binding_element(element, value)
       vs_uri = element.binding.valueSet
@@ -392,7 +401,7 @@ module FHIR
         x = vs_uri.index('|')
         vs_uri = vs_uri[0..x - 1]
       end
-      valueset = FHIR::Definitions.get_codes(vs_uri)
+      valueset = definitions.get_codes(vs_uri)
 
       matching_type = 0
 
@@ -441,8 +450,24 @@ module FHIR
       return true if m.start_with?('application/xml', 'text/xml', 'application/json', 'text/json')
       false
     end
-    deprecate :is_some_type_of_xml_or_json, :some_type_of_xml_or_json?
 
-    private :valid_json?, :get_json_nodes, :build_hierarchy, :verify_element, :check_binding_element
+    def definition_namespace
+      FHIR.namespace_for(self.class)
+    end
+
+    def definitions
+      namespace = definition_namespace
+      if namespace.const_defined?(:Definitions, false)
+        namespace.const_get(:Definitions, false)
+      else
+        FHIR::Definitions
+      end
+    end
+
+    private :valid_json?, :get_json_nodes, :build_hierarchy, :verify_element, :check_binding_element,
+            :definition_namespace, :definitions
   end
 end
+
+FHIR::StructureDefinition.include(FHIR::StructureDefinitionBehavior)
+FHIR::R4B::StructureDefinition.include(FHIR::StructureDefinitionBehavior)

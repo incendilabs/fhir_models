@@ -253,7 +253,7 @@ module FHIR
         basetype = p.split('/').last
         matches_one_profile = true if ref.reference.include?(basetype)
         # check profiled resources
-        profile_basetype = FHIR::Definitions.basetype(p)
+        profile_basetype = fhir_definitions.basetype(p)
         matches_one_profile = true if profile_basetype && ref.reference.include?(profile_basetype)
       end
       matches_one_profile = true if meta['type_profiles'].include?('http://hl7.org/fhir/StructureDefinition/Resource')
@@ -282,7 +282,7 @@ module FHIR
       valid = false
       # Strip off the |4.0.0 or |4.0.1 or |2014-03-26 or similar from the ends of URLs
       uri&.gsub!(/\|[A-Za-z0-9\.\-]*/, '')
-      valueset = FHIR::Definitions.get_codes(uri)
+      valueset = fhir_definitions.get_codes(uri)
 
       if uri == 'http://hl7.org/fhir/ValueSet/mimetypes' || uri == 'http://www.rfc-editor.org/bcp/bcp13.txt'
         matches = MIME::Types[value]
@@ -301,6 +301,15 @@ module FHIR
       valid
     end
 
-    private :validate_reference_type, :check_binding_uri, :validate_field
+    def fhir_definitions
+      namespace = fhir_namespace
+      if namespace.const_defined?(:Definitions, false)
+        namespace.const_get(:Definitions, false)
+      else
+        FHIR::Definitions
+      end
+    end
+
+    private :validate_reference_type, :check_binding_uri, :validate_field, :fhir_definitions
   end
 end

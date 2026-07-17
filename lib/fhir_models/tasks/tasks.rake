@@ -52,6 +52,9 @@ namespace :fhir do
     generator.generate_metadata
     generator.generate_types
     generator.generate_resources
+    definitions.write_runtime_artifacts(
+      File.join('lib', 'fhir_models', 'definitions', 'r4b')
+    )
 
     if generator.missing_required_expansion
       FHIR.logger.error 'MISSING REQUIRED EXPANSION(S) -- This is a fatal error in the definition files.'

@@ -1,9 +1,18 @@
 require 'json'
 require 'open3'
+require 'fileutils'
 
 module FHIR
   module Boot
     class JsonDefinitions
+      RUNTIME_STRUCTURE_FILES = %w[
+        profiles-types.json
+        profiles-resources.json
+        profiles-others.json
+        extension-definitions.json
+        search-parameters.json
+      ].freeze
+
       attr_reader :archive, :expansions
 
       def initialize(archive, expansions:)
@@ -61,6 +70,33 @@ module FHIR
         @cache[uri] = codes
       end
 
+      def write_runtime_artifacts(root)
+        structures = File.join(root, 'structures')
+        valuesets = File.join(root, 'valuesets')
+        FileUtils.rm_rf([structures, valuesets])
+        FileUtils.mkdir_p([structures, valuesets])
+
+        RUNTIME_STRUCTURE_FILES.each do |filename|
+          destination = File.join(structures, filename)
+          copy_archived_artifact(filename, destination)
+          Preprocess.pre_process_bundle(destination)
+        end
+
+        valueset_destination = File.join(valuesets, 'valuesets.json')
+        copy_archived_artifact('valuesets.json', valueset_destination)
+        Preprocess.pre_process_bundle(valueset_destination)
+
+        expansion_destination = File.join(valuesets, 'expansions.json')
+        FileUtils.cp(expansions, expansion_destination)
+        Preprocess.pre_process_bundle(expansion_destination)
+
+        copy_archived_artifact(
+          'version.info',
+          File.join(root, 'version.info'),
+          normalize_line_endings: true
+        )
+      end
+
       private
 
       def types
@@ -73,6 +109,18 @@ module FHIR
 
       def search_params
         @search_params ||= load_archived_bundle('search-parameters.json')
+      end
+
+      def profiles
+        @profiles ||= load_archived_bundle('profiles-others.json').select do |resource|
+          resource['resourceType'] == 'StructureDefinition'
+        end
+      end
+
+      def extensions
+        @extensions ||= load_archived_bundle('extension-definitions.json').select do |resource|
+          resource['resourceType'] == 'StructureDefinition'
+        end
       end
 
       def valuesets
@@ -97,6 +145,17 @@ module FHIR
         end
 
         bundle['entry'].map { |entry| entry['resource'] }.compact
+      end
+
+      def copy_archived_artifact(filename, destination, normalize_line_endings: false)
+        contents, status = Open3.capture2('unzip', '-p', archive, "definitions.json/#{filename}")
+        raise "Unable to read #{filename} from #{archive}" unless status.success?
+
+        if normalize_line_endings
+          contents = contents.gsub("\r\n", "\n")
+          contents += "\n" unless contents.end_with?("\n")
+        end
+        File.binwrite(destination, contents)
       end
 
       def collect_expansion_codes(entry, codes, inherited_system = nil)
@@ -131,6 +190,7 @@ module FHIR
           collect_code_system_codes(concept['concept'], codes)
         end
       end
+
     end
   end
 end

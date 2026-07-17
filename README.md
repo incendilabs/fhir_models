@@ -57,6 +57,9 @@ The expected definition archive SHA-256 is
 expected expansion bundle SHA-256 is
 `fe10ca33f0de85c16b367cb57092076d7e2fbd7aff6479c8862a32bd227e3b07`.
 Generated metadata, types, and resources are written to `lib/fhir_models/r4b`.
+Preprocessed runtime definition bundles and version metadata are written to
+`lib/fhir_models/definitions/r4b` and are checked into the repository. The
+downloaded source archive and expansion bundle are not checked in.
 
   Creating an `Observation` by hand...
   ```ruby
