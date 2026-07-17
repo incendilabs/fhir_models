@@ -1,5 +1,7 @@
 require 'fhir_models'
 require 'digest'
+require 'fileutils'
+require 'open3'
 namespace :fhir do
   desc 'console'
   task :console, [] do |_t, _args|
@@ -60,6 +62,38 @@ namespace :fhir do
       FHIR.logger.error 'MISSING REQUIRED EXPANSION(S) -- This is a fatal error in the definition files.'
     elsif generator.missing_expansions
       FHIR.logger.info 'Missing expansions can be safely ignored due to weak binding strengths.'
+    end
+  end
+
+  desc 'generate R4B XML schemas from the official schema archive'
+  task :generate_r4b_schema, [:archive] do |_t, args|
+    archive = args[:archive] || ENV['R4B_SCHEMA']
+    raise ArgumentError, 'Provide the R4B schema archive path' if archive.nil? || archive.empty?
+
+    checksum = Digest::SHA256.file(archive).hexdigest
+    unless checksum == FHIR::R4B::SCHEMA_SHA256
+      raise ArgumentError, "Unexpected R4B schema archive checksum: #{checksum}"
+    end
+
+    entries, status = Open3.capture2('unzip', '-Z1', archive)
+    raise "Unable to list R4B schemas from #{archive}" unless status.success?
+
+    schema_entries = entries.lines.map(&:strip).select do |entry|
+      entry.match?(%r{\Afhir-all-xsd/[^/]+\.xsd\z})
+    end.sort
+    raise "No R4B schemas found in #{archive}" if schema_entries.empty?
+
+    destination = File.join('lib', 'fhir_models', 'definitions', 'r4b', 'schema')
+    FileUtils.rm_rf(destination)
+    FileUtils.mkdir_p(destination)
+
+    schema_entries.each do |entry|
+      contents, read_status = Open3.capture2('unzip', '-p', archive, entry)
+      raise "Unable to read #{entry} from #{archive}" unless read_status.success?
+
+      schema = File.join(destination, File.basename(entry))
+      File.binwrite(schema, contents)
+      FHIR::Boot::Preprocess.pre_process_schema(schema)
     end
   end
 
