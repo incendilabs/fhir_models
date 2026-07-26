@@ -35,16 +35,17 @@ namespace :fhir do
     raise ArgumentError, 'Provide the R4B definitions archive path' if archive.nil? || archive.empty?
     raise ArgumentError, 'Provide the R4B expansions bundle path' if expansions.nil? || expansions.empty?
 
-    definitions_checksum = Digest::SHA256.file(archive).hexdigest
-    unless definitions_checksum == FHIR::R4B::DEFINITIONS_SHA256
-      raise ArgumentError, "Unexpected R4B definitions archive checksum: #{definitions_checksum}"
-    end
     expansions_checksum = Digest::SHA256.file(expansions).hexdigest
     unless expansions_checksum == FHIR::R4B::EXPANSIONS_SHA256
       raise ArgumentError, "Unexpected R4B expansions bundle checksum: #{expansions_checksum}"
     end
 
-    definitions = FHIR::Boot::JsonDefinitions.new(archive, expansions: expansions)
+    definitions = FHIR::Boot::JsonDefinitions.new(
+      archive,
+      expansions: expansions,
+      entry_root: 'definitions.json',
+      expected_checksum: FHIR::R4B::DEFINITIONS_SHA256
+    )
     generator = FHIR::Boot::Generator.new(
       true,
       definitions: definitions,
