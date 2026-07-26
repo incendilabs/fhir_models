@@ -1,0 +1,39 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "nested",
+        "url": "http://example.org/fhir/ValueSet/nested",
+        "status": "active",
+        "expansion": {
+          "contains": [
+            {
+              "system": "http://example.org/fhir/CodeSystem/nested",
+              "code": "abstract-parent",
+              "display": "Abstract parent",
+              "abstract": true,
+              "contains": [
+                {
+                  "code": "selectable-child",
+                  "display": "Selectable child"
+                },
+                {
+                  "code": "inactive-child",
+                  "display": "Inactive child",
+                  "inactive": true
+                },
+                {
+                  "code": "selectable-leaf",
+                  "display": "Selectable leaf"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

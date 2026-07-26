@@ -1,0 +1,26 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "StructureDefinition",
+        "id": "HumanName",
+        "url": "http://hl7.org/fhir/StructureDefinition/HumanName",
+        "name": "HumanName",
+        "status": "active",
+        "kind": "complex-type",
+        "abstract": false,
+        "type": "HumanName",
+        "snapshot": {
+          "element": [
+            {
+              "id": "HumanName",
+              "path": "HumanName"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
