@@ -26,6 +26,14 @@ module FHIR
     class Model < FHIR::Model
     end
 
+    class Definitions < FHIR::Boot::DefinitionProvider
+      configure(
+        root: File.expand_path('definitions/r5', __dir__),
+        namespace: FHIR::R5,
+        search_parameter_field: 'expression'
+      )
+    end
+
     module Json
       include FHIR::Json
 

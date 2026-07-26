@@ -50,3 +50,4 @@ end
 
 FHIR::ElementDefinition.include(FHIR::ElementDefinitionBehavior)
 FHIR::R4B::ElementDefinition.include(FHIR::ElementDefinitionBehavior)
+FHIR::R5::ElementDefinition.include(FHIR::ElementDefinitionBehavior)

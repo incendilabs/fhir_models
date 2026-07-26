@@ -471,3 +471,4 @@ end
 
 FHIR::StructureDefinition.include(FHIR::StructureDefinitionBehavior)
 FHIR::R4B::StructureDefinition.include(FHIR::StructureDefinitionBehavior)
+FHIR::R5::StructureDefinition.include(FHIR::StructureDefinitionBehavior)

@@ -5,7 +5,7 @@ require 'tmpdir'
 
 load File.expand_path('../../../lib/fhir_models/tasks/tasks.rake', __dir__)
 
-describe 'fhir:generate_r5_models' do
+describe 'FHIR R5 generation tasks' do
   around do |example|
     Dir.mktmpdir do |directory|
       @directory = directory
@@ -67,6 +67,80 @@ describe 'fhir:generate_r5_models' do
     end.to raise_error(ArgumentError, /Unexpected FHIR definitions archive checksum/)
 
     expect(directory_contents(destination)).to eq('sentinel.txt' => 'preserved')
+  end
+
+  it 'requires explicit extension source arguments for runtime definitions' do
+    task = Rake::Task['fhir:generate_r5_definitions']
+
+    task.reenable
+    expect { task.invoke }.to raise_error(
+      ArgumentError,
+      /Provide the R5 definitions archive path/
+    )
+
+    task.reenable
+    expect { task.invoke('definitions.zip') }.to raise_error(
+      ArgumentError,
+      /Provide the R5 expansions package path/
+    )
+
+    task.reenable
+    expect { task.invoke('definitions.zip', 'expansions.tgz') }.to raise_error(
+      ArgumentError,
+      /Provide the R5 extensions package path/
+    )
+  end
+
+  it 'preserves existing runtime definitions when extension validation fails' do
+    destination = destination_with_sentinel
+    definitions = instance_double(FHIR::Boot::JsonDefinitions)
+    allow(FHIR::Tasks).to receive(:with_r5_definitions).and_yield(
+      definitions,
+      @directory
+    )
+    expect(definitions).not_to receive(:write_runtime_artifacts)
+    extensions = write_source('extensions.tgz', 'not extensions')
+
+    expect do
+      FHIR::Tasks.generate_r5_definitions(
+        definitions_archive: 'definitions.zip',
+        expansions_package: 'expansions.tgz',
+        extensions_package: extensions,
+        destination: destination,
+        temporary_root: @directory
+      )
+    end.to raise_error(ArgumentError, /Unexpected FHIR package checksum/)
+
+    expect(directory_contents(destination)).to eq('sentinel.txt' => 'preserved')
+  end
+
+  it 'orchestrates model and runtime-definition generation with explicit destinations' do
+    model_destination = File.join(@directory, 'models')
+    definition_destination = File.join(@directory, 'definitions')
+    allow(FHIR::Tasks).to receive(:generate_r5_models)
+    allow(FHIR::Tasks).to receive(:generate_r5_definitions)
+    task = Rake::Task['fhir:generate_r5']
+
+    task.reenable
+    task.invoke(
+      'definitions.zip',
+      'expansions.tgz',
+      'extensions.tgz',
+      model_destination,
+      definition_destination
+    )
+
+    expect(FHIR::Tasks).to have_received(:generate_r5_models).with(
+      definitions_archive: 'definitions.zip',
+      expansions_package: 'expansions.tgz',
+      destination: model_destination
+    )
+    expect(FHIR::Tasks).to have_received(:generate_r5_definitions).with(
+      definitions_archive: 'definitions.zip',
+      expansions_package: 'expansions.tgz',
+      extensions_package: 'extensions.tgz',
+      destination: definition_destination
+    )
   end
 
   def destination_with_sentinel

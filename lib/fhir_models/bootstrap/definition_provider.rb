@@ -7,9 +7,13 @@ module FHIR
       extend FHIR::Deprecate
 
       class << self
-        def configure(root:, namespace:)
+        def configure(root:, namespace:, search_parameter_field: 'xpath')
           @root = File.expand_path(root)
           @namespace = namespace
+          @search_parameter_field = search_parameter_field.to_s
+          unless %w[expression xpath].include?(@search_parameter_field)
+            raise ArgumentError, "Unsupported search parameter field: #{@search_parameter_field}"
+          end
           @types = nil
           @resources = nil
           @profiles = nil
@@ -166,9 +170,10 @@ module FHIR
           return nil if type_name.nil?
 
           search_params.select do |parameter|
+            expression = parameter[@search_parameter_field]
             parameter.fetch('base', []).include?(type_name) &&
-              parameter['xpath'] &&
-              !parameter['xpath'].include?('extension')
+              expression &&
+              !expression.include?('extension')
           end.map { |parameter| parameter['code'] }
         end
 
