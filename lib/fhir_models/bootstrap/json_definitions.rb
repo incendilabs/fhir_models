@@ -1,6 +1,6 @@
 require 'json'
-require 'open3'
 require 'fileutils'
+require_relative 'zip_archive'
 
 module FHIR
   module Boot
@@ -13,14 +13,20 @@ module FHIR
         search-parameters.json
       ].freeze
 
-      attr_reader :archive, :expansions
+      attr_reader :archive, :entry_root, :expansions
 
-      def initialize(archive, expansions:)
+      def initialize(archive, expansions:, entry_root:, expected_checksum:)
         @archive = File.expand_path(archive)
+        @entry_root = entry_root
         @expansions = File.expand_path(expansions)
-        raise ArgumentError, "Definition archive not found: #{@archive}" unless File.file?(@archive)
         raise ArgumentError, "Expansion bundle not found: #{@expansions}" unless File.file?(@expansions)
 
+        @source = ZipArchive.new(
+          @archive,
+          entry_root: entry_root,
+          expected_checksum: expected_checksum,
+          label: 'FHIR definitions'
+        )
         @cache = {}
       end
 
@@ -132,10 +138,7 @@ module FHIR
       end
 
       def load_archived_bundle(filename)
-        json, status = Open3.capture2('unzip', '-p', archive, "definitions.json/#{filename}")
-        raise "Unable to read #{filename} from #{archive}" unless status.success?
-
-        load_bundle(json)
+        load_bundle(@source.read(filename))
       end
 
       def load_bundle(json)
@@ -148,8 +151,7 @@ module FHIR
       end
 
       def copy_archived_artifact(filename, destination, normalize_line_endings: false)
-        contents, status = Open3.capture2('unzip', '-p', archive, "definitions.json/#{filename}")
-        raise "Unable to read #{filename} from #{archive}" unless status.success?
+        contents = @source.read(filename)
 
         if normalize_line_endings
           contents = contents.gsub("\r\n", "\n")
