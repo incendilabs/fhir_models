@@ -112,6 +112,45 @@ describe FHIR::Boot::JsonDefinitions do
     expect(directory_contents(actual)).to eq directory_contents(expected)
   end
 
+  it 'uses an explicitly supplied extension definitions Bundle' do
+    entries = described_class::RUNTIME_STRUCTURE_FILES.each_with_object({}) do |filename, result|
+      next if filename == 'extension-definitions.json'
+
+      result[filename] = bundle
+    end
+    entries['valuesets.json'] = bundle
+    entries['version.info'] = "version=5.0.0\n"
+    archive = build_zip('r5.zip', entries)
+    definitions = definitions_for(archive, entry_root: '')
+    extension_bundle = File.join(@directory, 'package-extensions.json')
+    File.write(
+      extension_bundle,
+      JSON.generate(
+        'resourceType' => 'Bundle',
+        'entry' => [
+          {
+            'resource' => {
+              'resourceType' => 'StructureDefinition',
+              'id' => 'packaged-extension',
+              'type' => 'Extension'
+            }
+          }
+        ]
+      )
+    )
+    destination = File.join(@directory, 'r5-runtime')
+
+    definitions.write_runtime_artifacts(
+      destination,
+      extension_definitions: extension_bundle
+    )
+
+    generated = JSON.parse(
+      File.read(File.join(destination, 'structures', 'extension-definitions.json'))
+    )
+    expect(generated.dig('entry', 0, 'resource', 'id')).to eq 'packaged-extension'
+  end
+
   def definitions_for(archive, entry_root:)
     described_class.new(
       archive,

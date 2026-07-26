@@ -76,7 +76,14 @@ module FHIR
         @cache[uri] = codes
       end
 
-      def write_runtime_artifacts(root)
+      def write_runtime_artifacts(root, extension_definitions: nil)
+        if extension_definitions
+          extension_definitions = File.expand_path(extension_definitions)
+          unless File.file?(extension_definitions)
+            raise ArgumentError, "Extension definitions bundle not found: #{extension_definitions}"
+          end
+        end
+
         structures = File.join(root, 'structures')
         valuesets = File.join(root, 'valuesets')
         FileUtils.rm_rf([structures, valuesets])
@@ -84,7 +91,11 @@ module FHIR
 
         RUNTIME_STRUCTURE_FILES.each do |filename|
           destination = File.join(structures, filename)
-          copy_archived_artifact(filename, destination)
+          if filename == 'extension-definitions.json' && extension_definitions
+            FileUtils.cp(extension_definitions, destination)
+          else
+            copy_archived_artifact(filename, destination)
+          end
           Preprocess.pre_process_bundle(destination)
         end
 
