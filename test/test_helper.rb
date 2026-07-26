@@ -9,17 +9,6 @@ require 'pry'
 require 'fhir_models'
 FHIR.logger.level = Logger::INFO
 
-PRIMITIVE_EXTENSIONS = [
-  'activitydefinition-administer-zika-virus-exposure-assessment',
-  'activitydefinition-example',
-  'activitydefinition-order-serum-dengue-virus-igm',
-  'activitydefinition-order-serum-zika-dengue-virus-igm',
-  'activitydefinition-predecessor-example',
-  'activitydefinition-provide-mosquito-prevention-advice',
-  'activitydefinition-servicerequest-example',
-  'plandefinition-example-cardiology-os',
-  'plandefinition-example'
-]
 SLOW_FIXTURES = [
   'valueset-ucum-common',
   'capabilitystatement-base',

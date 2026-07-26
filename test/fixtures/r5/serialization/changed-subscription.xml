@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Subscription xmlns="http://hl7.org/fhir">
+  <status value="requested"/>
+  <topic value="http://example.org/SubscriptionTopic/encounters"/>
+  <filterBy>
+    <resourceType value="Encounter"/>
+    <filterParameter value="patient"/>
+    <value value="Patient/patient"/>
+  </filterBy>
+  <channelType>
+    <system value="http://terminology.hl7.org/CodeSystem/subscription-channel-type"/>
+    <code value="rest-hook"/>
+  </channelType>
+  <endpoint value="https://example.org/hooks/fhir"/>
+</Subscription>

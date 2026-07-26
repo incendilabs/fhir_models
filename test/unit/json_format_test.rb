@@ -83,7 +83,7 @@ class JsonFormatTest < Test::Unit::TestCase
   def compare(hash_input, hash_output)
     return [hash_input] if hash_output.nil?
 
-    # ignore fhir comments -- we don't support them.
+    # Ignore FHIR comments, which are not preserved by the models.
     strip_out_unsupported!(hash_input)
     strip_out_unsupported!(hash_output)
 
@@ -132,13 +132,11 @@ class JsonFormatTest < Test::Unit::TestCase
     errors
   end
 
-  # This method removes fhir_comments and primitive extensions
-  # from the hash... we don't support them.
+  # Remove FHIR comments recursively.
   def strip_out_unsupported!(hash)
     hash.each do |key, value|
       delete_key = false
-      # delete fhir_comments and primitive extensions
-      if key == 'fhir_comments' || key.start_with?('_')
+      if key == 'fhir_comments'
         delete_key = true
       elsif value.is_a?(Array)
         value.each do |thing|
