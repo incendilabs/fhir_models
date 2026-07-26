@@ -17,7 +17,6 @@ $ bundle exec rake fhir:console
 - XML and JSON support
 - Resource Validation
 - Not Supported
-  - Primitive Extensions
   - FHIR Comments
 
 ### Resource Basics

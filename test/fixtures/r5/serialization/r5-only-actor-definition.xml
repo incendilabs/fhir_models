@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ActorDefinition xmlns="http://hl7.org/fhir">
+  <extension url="http://example.org/fhir/StructureDefinition/support-contact">
+    <valueExtendedContactDetail>
+      <name>
+        <text value="R5 Support"/>
+      </name>
+      <telecom>
+        <system value="email"/>
+        <value value="support@example.org"/>
+      </telecom>
+    </valueExtendedContactDetail>
+  </extension>
+  <url value="http://example.org/fhir/ActorDefinition/client"/>
+  <status value="active"/>
+  <type value="system"/>
+</ActorDefinition>
