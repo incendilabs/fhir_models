@@ -1,6 +1,9 @@
 require_relative '../test_helper'
+require_relative '../support/model_graph_assertions'
 
 class R5SerializationAcceptanceTest < Test::Unit::TestCase
+  include ModelGraphAssertions
+
   FIXTURE_ROOT = File.expand_path('../fixtures/r5/serialization', __dir__)
   FIXTURES = {
     'unchanged-bundle' => FHIR::R5::Bundle,
@@ -119,27 +122,6 @@ class R5SerializationAcceptanceTest < Test::Unit::TestCase
   end
 
   def assert_r5_graph(value, path = 'resource')
-    case value
-    when FHIR::Model
-      assert_true value.is_a?(FHIR::R5::Model),
-                  "#{path} unexpectedly contains #{value.class}"
-      value.class::METADATA.each do |field, raw_metadata|
-        metadata = raw_metadata.is_a?(Array) ? raw_metadata.first : raw_metadata
-        next unless metadata
-
-        local_name = metadata['local_name'] || field
-        assert_r5_graph(
-          value.instance_variable_get("@#{local_name}"),
-          "#{path}.#{field}"
-        )
-      end
-      value.primitive_extensions.to_h.each do |field, extension|
-        assert_r5_graph(extension, "#{path}._#{field}")
-      end
-    when Array
-      value.each_with_index { |item, index| assert_r5_graph(item, "#{path}[#{index}]") }
-    when Hash
-      value.each { |key, item| assert_r5_graph(item, "#{path}.#{key}") }
-    end
+    assert_model_graph_namespace(value, FHIR::R5, path)
   end
 end
