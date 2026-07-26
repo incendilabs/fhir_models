@@ -81,6 +81,38 @@ describe FHIR::Boot::JsonDefinitions do
     end.to raise_error(ArgumentError, /Missing FHIR definitions archive entry/)
   end
 
+  it 'selects search parameters through an explicitly configured source field' do
+    search_parameters = JSON.generate(
+      'resourceType' => 'Bundle',
+      'entry' => [
+        {
+          'resource' => {
+            'resourceType' => 'SearchParameter',
+            'code' => 'name',
+            'base' => ['Patient'],
+            'expression' => 'Patient.name'
+          }
+        },
+        {
+          'resource' => {
+            'resourceType' => 'SearchParameter',
+            'code' => 'extension',
+            'base' => ['Patient'],
+            'expression' => 'Patient.extension'
+          }
+        }
+      ]
+    )
+    archive = build_zip('search.zip', 'search-parameters.json' => search_parameters)
+    definitions = definitions_for(
+      archive,
+      entry_root: '',
+      search_parameter_field: 'expression'
+    )
+
+    expect(definitions.search_parameters('Patient')).to eq ['name']
+  end
+
   it 'rejects an incorrect checksum before listing archive entries' do
     archive = File.join(@directory, 'not-a-zip.zip')
     File.write(archive, 'not a ZIP archive')
@@ -151,12 +183,13 @@ describe FHIR::Boot::JsonDefinitions do
     expect(generated.dig('entry', 0, 'resource', 'id')).to eq 'packaged-extension'
   end
 
-  def definitions_for(archive, entry_root:)
+  def definitions_for(archive, entry_root:, **options)
     described_class.new(
       archive,
       expansions: @expansions,
       entry_root: entry_root,
-      expected_checksum: Digest::SHA256.file(archive).hexdigest
+      expected_checksum: Digest::SHA256.file(archive).hexdigest,
+      **options
     )
   end
 

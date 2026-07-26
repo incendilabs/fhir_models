@@ -84,7 +84,7 @@ module FHIR
             value.each do |k, v|
               s << "#{space}  \"#{k}\" => #{v},"
               # Replace wildcard string with Infinity constant
-              s[-1].gsub!('"max"=>"*"', '"max"=>Float::INFINITY')
+              s[-1].gsub!(/"max"\s*=>\s*"\*"/, '"max"=>Float::INFINITY')
               s[-1].gsub!(/'/, %q(\\\'))
               s[-1].tr!('"', '\'')
             end

@@ -1,0 +1,31 @@
+module FHIR
+  module R5
+    class ProductShelfLife < FHIR::R5::Model
+      include FHIR::R5::Hashable
+      include FHIR::R5::Json
+      include FHIR::R5::Xml
+
+      MULTIPLE_TYPES = {
+        'period' => ['Duration', 'string']
+      }
+      SEARCH_PARAMS = []
+      METADATA = {
+        'id' => {'path' => 'ProductShelfLife.id', 'type' => 'string', 'min' => 0, 'max' => 1},
+        'extension' => {'path' => 'ProductShelfLife.extension', 'type' => 'Extension', 'min' => 0, 'max'=>Float::INFINITY},
+        'modifierExtension' => {'path' => 'ProductShelfLife.modifierExtension', 'type' => 'Extension', 'min' => 0, 'max'=>Float::INFINITY},
+        'type' => {'path' => 'ProductShelfLife.type', 'type' => 'CodeableConcept', 'min' => 0, 'max' => 1},
+        'periodDuration' => {'path' => 'ProductShelfLife.period[x]', 'type' => 'Duration', 'min' => 0, 'max' => 1},
+        'periodString' => {'path' => 'ProductShelfLife.period[x]', 'type' => 'string', 'min' => 0, 'max' => 1},
+        'specialPrecautionsForStorage' => {'path' => 'ProductShelfLife.specialPrecautionsForStorage', 'type' => 'CodeableConcept', 'min' => 0, 'max'=>Float::INFINITY}
+      }
+
+      attr_accessor :id                           # 0-1 string
+      attr_accessor :extension                    # 0-* [ Extension ]
+      attr_accessor :modifierExtension            # 0-* [ Extension ]
+      attr_accessor :type                         # 0-1 CodeableConcept
+      attr_accessor :periodDuration               # 0-1 Duration
+      attr_accessor :periodString                 # 0-1 string
+      attr_accessor :specialPrecautionsForStorage # 0-* [ CodeableConcept ]
+    end
+  end
+end

@@ -1,0 +1,22 @@
+module FHIR
+  module R5
+    class Narrative < FHIR::R5::Model
+      include FHIR::R5::Hashable
+      include FHIR::R5::Json
+      include FHIR::R5::Xml
+
+      SEARCH_PARAMS = []
+      METADATA = {
+        'id' => {'path' => 'Narrative.id', 'type' => 'string', 'min' => 0, 'max' => 1},
+        'extension' => {'path' => 'Narrative.extension', 'type' => 'Extension', 'min' => 0, 'max'=>Float::INFINITY},
+        'status' => {'valid_codes' => {'http://hl7.org/fhir/narrative-status' => ['generated', 'extensions', 'additional', 'empty']}, 'path' => 'Narrative.status', 'type' => 'code', 'min' => 1, 'max' => 1, 'binding' => {'strength' => 'required', 'uri' => 'http://hl7.org/fhir/ValueSet/narrative-status'}},
+        'div' => {'path' => 'Narrative.div', 'type' => 'xhtml', 'min' => 1, 'max' => 1}
+      }
+
+      attr_accessor :id        # 0-1 string
+      attr_accessor :extension # 0-* [ Extension ]
+      attr_accessor :status    # 1-1 code
+      attr_accessor :div       # 1-1 xhtml
+    end
+  end
+end
