@@ -13,12 +13,22 @@ module FHIR
         search-parameters.json
       ].freeze
 
-      attr_reader :archive, :entry_root, :expansions
+      attr_reader :archive, :entry_root, :expansions, :search_parameter_field
 
-      def initialize(archive, expansions:, entry_root:, expected_checksum:)
+      def initialize(
+        archive,
+        expansions:,
+        entry_root:,
+        expected_checksum:,
+        search_parameter_field: 'xpath'
+      )
         @archive = File.expand_path(archive)
         @entry_root = entry_root
         @expansions = File.expand_path(expansions)
+        @search_parameter_field = search_parameter_field.to_s
+        unless %w[expression xpath].include?(@search_parameter_field)
+          raise ArgumentError, "Unsupported search parameter field: #{@search_parameter_field}"
+        end
         raise ArgumentError, "Expansion bundle not found: #{@expansions}" unless File.file?(@expansions)
 
         @source = ZipArchive.new(
@@ -49,9 +59,10 @@ module FHIR
         return nil if type_name.nil?
 
         search_params.select do |parameter|
+          expression = parameter[search_parameter_field]
           parameter['base'].include?(type_name) &&
-            parameter['xpath'] &&
-            !parameter['xpath'].include?('extension')
+            expression &&
+            !expression.include?('extension')
         end.map { |parameter| parameter['code'] }
       end
 

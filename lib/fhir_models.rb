@@ -17,6 +17,7 @@ end
 
 require File.join(root, 'lib', 'fhir_models', 'fhir.rb')
 require File.join(root, 'lib', 'fhir_models', 'r4b.rb')
+require File.join(root, 'lib', 'fhir_models', 'r5.rb')
 
 # Require the generated code
 Dir.glob(File.join(root, 'lib', 'fhir_models', 'fhir', '*.rb')).each do |file|
@@ -32,6 +33,15 @@ Dir.glob(File.join(root, 'lib', 'fhir_models', 'r4b', 'types', '*.rb')).sort.eac
   require file
 end
 Dir.glob(File.join(root, 'lib', 'fhir_models', 'r4b', 'resources', '*.rb')).sort.each do |file|
+  require file
+end
+
+# Require the generated R5 code
+require File.join(root, 'lib', 'fhir_models', 'r5', 'metadata.rb')
+Dir.glob(File.join(root, 'lib', 'fhir_models', 'r5', 'types', '*.rb')).sort.each do |file|
+  require file
+end
+Dir.glob(File.join(root, 'lib', 'fhir_models', 'r5', 'resources', '*.rb')).sort.each do |file|
   require file
 end
 

@@ -1,6 +1,87 @@
 require 'fhir_models'
 require 'digest'
 require 'fileutils'
+require 'tmpdir'
+require_relative '../r5'
+
+module FHIR
+  module Tasks
+    ROOT = File.expand_path('../../..', __dir__).freeze
+
+    module_function
+
+    def with_r5_definitions(
+      definitions_archive:,
+      expansions_package:,
+      temporary_root: File.join(ROOT, 'tmp')
+    )
+      FileUtils.mkdir_p(temporary_root)
+      working = Dir.mktmpdir('r5-definitions-', temporary_root)
+
+      begin
+        expansions = File.join(working, 'expansions.json')
+        FHIR::Boot::ExpansionPackage.r5(expansions_package).write(expansions)
+        definitions = FHIR::Boot::JsonDefinitions.new(
+          definitions_archive,
+          expansions: expansions,
+          entry_root: '',
+          expected_checksum: FHIR::R5::DEFINITIONS_SHA256,
+          search_parameter_field: 'expression'
+        )
+        yield definitions
+      ensure
+        FileUtils.rm_rf(working)
+      end
+    end
+
+    def generate_r5_models(
+      definitions_archive:,
+      expansions_package:,
+      destination:,
+      temporary_root: File.join(ROOT, 'tmp')
+    )
+      with_r5_definitions(
+        definitions_archive: definitions_archive,
+        expansions_package: expansions_package,
+        temporary_root: temporary_root
+      ) do |definitions|
+        destination = File.expand_path(destination, ROOT)
+        parent = File.dirname(destination)
+        FileUtils.mkdir_p(parent)
+        staging = Dir.mktmpdir(".#{File.basename(destination)}-", parent)
+
+        begin
+          generator = FHIR::Boot::Generator.new(
+            true,
+            definitions: definitions,
+            namespace: 'FHIR::R5',
+            output_directory: staging
+          )
+          generator.generate_metadata
+          generator.generate_types
+          generator.generate_resources
+
+          if generator.missing_required_expansion
+            FHIR.logger.error(
+              'MISSING REQUIRED EXPANSION(S) -- This is a fatal error in the definition files.'
+            )
+          elsif generator.missing_expansions
+            FHIR.logger.info(
+              'Missing expansions can be safely ignored due to weak binding strengths.'
+            )
+          end
+
+          FileUtils.rm_rf(destination)
+          FileUtils.mv(staging, destination)
+          staging = nil
+        ensure
+          FileUtils.rm_rf(staging) if staging
+        end
+      end
+    end
+  end
+end
+
 namespace :fhir do
   desc 'console'
   task :console, [] do |_t, _args|
@@ -63,6 +144,21 @@ namespace :fhir do
     elsif generator.missing_expansions
       FHIR.logger.info 'Missing expansions can be safely ignored due to weak binding strengths.'
     end
+  end
+
+  desc 'generate R5 models from official JSON definitions and expansion packages'
+  task :generate_r5_models, [:definitions, :expansions, :destination] do |_t, args|
+    definitions = args[:definitions]
+    expansions = args[:expansions]
+    destination = args[:destination] || File.join('lib', 'fhir_models', 'r5')
+    raise ArgumentError, 'Provide the R5 definitions archive path' if definitions.nil? || definitions.empty?
+    raise ArgumentError, 'Provide the R5 expansions package path' if expansions.nil? || expansions.empty?
+
+    FHIR::Tasks.generate_r5_models(
+      definitions_archive: definitions,
+      expansions_package: expansions,
+      destination: destination
+    )
   end
 
   desc 'generate R4B XML schemas from the official schema archive'
