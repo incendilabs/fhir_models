@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bundle xmlns="http://hl7.org/fhir">
+  <type value="collection"/>
+  <entry>
+    <fullUrl value="urn:uuid:patient"/>
+    <resource>
+      <Patient>
+        <id value="patient"/>
+        <contained>
+          <Observation>
+            <id value="observation"/>
+            <status value="final"/>
+            <code>
+              <text value="Body temperature"/>
+            </code>
+            <subject>
+              <reference value="Patient/patient"/>
+            </subject>
+            <valueQuantity>
+              <value value="37.2"/>
+              <unit value="C"/>
+            </valueQuantity>
+          </Observation>
+        </contained>
+        <name>
+          <given value="Ada"/>
+          <given>
+            <extension url="http://hl7.org/fhir/StructureDefinition/data-absent-reason">
+              <valueCode value="unknown"/>
+            </extension>
+          </given>
+          <given value="Lovelace"/>
+        </name>
+        <birthDate value="1970-01-01">
+          <extension url="http://hl7.org/fhir/StructureDefinition/data-absent-reason">
+            <valueCode value="estimated"/>
+          </extension>
+        </birthDate>
+        <managingOrganization>
+          <reference value="Organization/example"/>
+        </managingOrganization>
+      </Patient>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="urn:uuid:integer64-values"/>
+    <resource>
+      <Parameters>
+        <parameter>
+          <name value="minimum"/>
+          <valueInteger64 value="-9223372036854775808"/>
+        </parameter>
+        <parameter>
+          <name value="typical"/>
+          <valueInteger64 value="42"/>
+        </parameter>
+        <parameter>
+          <name value="maximum"/>
+          <valueInteger64 value="9223372036854775807"/>
+        </parameter>
+      </Parameters>
+    </resource>
+  </entry>
+</Bundle>

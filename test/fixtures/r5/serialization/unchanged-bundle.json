@@ -1,0 +1,83 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "urn:uuid:patient",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "patient",
+        "contained": [
+          {
+            "resourceType": "Observation",
+            "id": "observation",
+            "status": "final",
+            "code": {
+              "text": "Body temperature"
+            },
+            "subject": {
+              "reference": "Patient/patient"
+            },
+            "valueQuantity": {
+              "value": 37.2,
+              "unit": "C"
+            }
+          }
+        ],
+        "birthDate": "1970-01-01",
+        "_birthDate": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+              "valueCode": "estimated"
+            }
+          ]
+        },
+        "name": [
+          {
+            "given": [
+              "Ada",
+              null,
+              "Lovelace"
+            ],
+            "_given": [
+              null,
+              {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                    "valueCode": "unknown"
+                  }
+                ]
+              },
+              null
+            ]
+          }
+        ],
+        "managingOrganization": {
+          "reference": "Organization/example"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:integer64-values",
+      "resource": {
+        "resourceType": "Parameters",
+        "parameter": [
+          {
+            "name": "minimum",
+            "valueInteger64": -9223372036854775808
+          },
+          {
+            "name": "typical",
+            "valueInteger64": 42
+          },
+          {
+            "name": "maximum",
+            "valueInteger64": 9223372036854775807
+          }
+        ]
+      }
+    }
+  ]
+}

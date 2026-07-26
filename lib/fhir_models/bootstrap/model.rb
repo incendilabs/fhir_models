@@ -6,6 +6,8 @@ require 'bcp47'
 module FHIR
   class Model
     extend FHIR::Deprecate
+    attr_reader :primitive_extensions
+
     def initialize(hash = {})
       from_hash(hash)
       self.class::METADATA.each do |key, value|

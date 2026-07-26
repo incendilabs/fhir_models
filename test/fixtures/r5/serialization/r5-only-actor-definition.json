@@ -1,0 +1,24 @@
+{
+  "resourceType": "ActorDefinition",
+  "extension": [
+    {
+      "url": "http://example.org/fhir/StructureDefinition/support-contact",
+      "valueExtendedContactDetail": {
+        "name": [
+          {
+            "text": "R5 Support"
+          }
+        ],
+        "telecom": [
+          {
+            "system": "email",
+            "value": "support@example.org"
+          }
+        ]
+      }
+    }
+  ],
+  "url": "http://example.org/fhir/ActorDefinition/client",
+  "status": "active",
+  "type": "system"
+}
