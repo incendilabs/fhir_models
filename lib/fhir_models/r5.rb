@@ -44,9 +44,21 @@ module FHIR
 
     module Xml
       include FHIR::Xml
+      extend FHIR::Deprecate
+
+      SCHEMA_ROOT = File.expand_path('definitions/r5/schema', __dir__).freeze
 
       def self.from_xml(xml)
         FHIR::Xml.from_xml(xml, FHIR::R5)
+      end
+
+      def self.valid?(xml)
+        validate(xml).empty?
+      end
+      deprecate :is_valid?, :valid?
+
+      def self.validate(xml)
+        FHIR::Xml.validate(xml, SCHEMA_ROOT)
       end
     end
 

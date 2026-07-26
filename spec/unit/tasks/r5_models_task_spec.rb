@@ -3,7 +3,9 @@ require 'fileutils'
 require 'rake'
 require 'tmpdir'
 
-load File.expand_path('../../../lib/fhir_models/tasks/tasks.rake', __dir__)
+unless Rake::Task.task_defined?('fhir:generate_r5_models')
+  load File.expand_path('../../../lib/fhir_models/tasks/tasks.rake', __dir__)
+end
 
 describe 'FHIR R5 generation tasks' do
   around do |example|

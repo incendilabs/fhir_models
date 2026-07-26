@@ -113,6 +113,14 @@ module FHIR
         end
       end
     end
+
+    def generate_r5_schema(schema_archive:, destination:)
+      FHIR::Boot::SchemaArchive.new(
+        schema_archive,
+        entry_root: '',
+        expected_checksum: FHIR::R5::SCHEMA_SHA256
+      ).extract(destination)
+    end
   end
 end
 
@@ -235,6 +243,19 @@ namespace :fhir do
       extensions_package: extensions,
       destination: args[:definition_destination] ||
         File.join('lib', 'fhir_models', 'definitions', 'r5')
+    )
+  end
+
+  desc 'generate R5 XML schemas from the official schema archive'
+  task :generate_r5_schema, [:archive, :destination] do |_t, args|
+    archive = args[:archive]
+    destination = args[:destination] ||
+      File.join('lib', 'fhir_models', 'definitions', 'r5', 'schema')
+    raise ArgumentError, 'Provide the R5 schema archive path' if archive.nil? || archive.empty?
+
+    FHIR::Tasks.generate_r5_schema(
+      schema_archive: archive,
+      destination: destination
     )
   end
 

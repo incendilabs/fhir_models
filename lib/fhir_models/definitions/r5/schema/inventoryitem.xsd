@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * #%L
+ * org.hl7.fhir.r5
+ * %%
+ * Copyright (C) 2014 - 2019 Health Level 7
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+/*
+  Copyright (c) 2011+, HL7, Inc.
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without modification,
+  are permitted provided that the following conditions are met:
+
+   * Redistributions of source code must retain the above copyright notice, this
+     list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+   * Neither the name of HL7 nor the names of its contributors may be used to
+     endorse or promote products derived from this software without specific
+     prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+  INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.
+
+
+  Generated on Sun, Mar 26, 2023 15:21+1100 for FHIR v5.0.0
+
+  Note: the schemas &amp; schematrons do not contain all of the rules about what makes resources
+  valid. Implementers will still need to be familiar with the content of the specification and with
+  any profiles that apply to the resources in order to make a conformant implementation.
+
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://hl7.org/fhir" xmlns:xhtml="http://www.w3.org/1999/xhtml" targetNamespace="http://hl7.org/fhir" elementFormDefault="qualified" version="1.0">
+  <xs:include schemaLocation="fhir-base.xsd"/>
+  <xs:element name="InventoryItem" type="InventoryItem">
+
+  </xs:element>
+  <xs:complexType name="InventoryItem">
+
+    <xs:complexContent>
+      <xs:extension base="DomainResource">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+
+          </xs:element>
+          <xs:element name="status" minOccurs="1" maxOccurs="1" type="InventoryItemStatusCodes">
+
+          </xs:element>
+          <xs:element name="category" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+
+          </xs:element>
+          <xs:element name="code" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+
+          </xs:element>
+          <xs:element name="name" type="InventoryItem.Name" minOccurs="0" maxOccurs="unbounded">
+
+          </xs:element>
+          <xs:element name="responsibleOrganization" type="InventoryItem.ResponsibleOrganization" minOccurs="0" maxOccurs="unbounded">
+
+          </xs:element>
+          <xs:element name="description" type="InventoryItem.Description" minOccurs="0" maxOccurs="1">
+
+          </xs:element>
+          <xs:element name="inventoryStatus" minOccurs="0" maxOccurs="unbounded" type="CodeableConcept">
+
+          </xs:element>
+          <xs:element name="baseUnit" minOccurs="0" maxOccurs="1" type="CodeableConcept">
+
+          </xs:element>
+          <xs:element name="netContent" minOccurs="0" maxOccurs="1" type="Quantity">
+
+          </xs:element>
+          <xs:element name="association" type="InventoryItem.Association" minOccurs="0" maxOccurs="unbounded">
+
+          </xs:element>
+          <xs:element name="characteristic" type="InventoryItem.Characteristic" minOccurs="0" maxOccurs="unbounded">
+
+          </xs:element>
+          <xs:element name="instance" type="InventoryItem.Instance" minOccurs="0" maxOccurs="1">
+
+          </xs:element>
+          <xs:element name="productReference" minOccurs="0" maxOccurs="1" type="Reference">
+
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="InventoryItem.Name">
+
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="nameType" minOccurs="1" maxOccurs="1" type="Coding">
+
+          </xs:element>
+          <xs:element name="language" minOccurs="1" maxOccurs="1" type="CommonLanguages">
+
+          </xs:element>
+          <xs:element name="name" minOccurs="1" maxOccurs="1" type="string">
+
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="InventoryItem.ResponsibleOrganization">
+
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="role" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+
+          </xs:element>
+          <xs:element name="organization" minOccurs="1" maxOccurs="1" type="Reference">
+
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="InventoryItem.Description">
+
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="language" minOccurs="0" maxOccurs="1" type="CommonLanguages">
+
+          </xs:element>
+          <xs:element name="description" minOccurs="0" maxOccurs="1" type="string">
+
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="InventoryItem.Association">
+
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="associationType" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+
+          </xs:element>
+          <xs:element name="relatedItem" minOccurs="1" maxOccurs="1" type="Reference">
+
+          </xs:element>
+          <xs:element name="quantity" minOccurs="1" maxOccurs="1" type="Ratio">
+
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="InventoryItem.Characteristic">
+
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="characteristicType" minOccurs="1" maxOccurs="1" type="CodeableConcept">
+
+          </xs:element>
+          <xs:choice minOccurs="1" maxOccurs="1">
+
+            <xs:element name="valueString" type="string"/>
+            <xs:element name="valueInteger" type="integer"/>
+            <xs:element name="valueDecimal" type="decimal"/>
+            <xs:element name="valueBoolean" type="boolean"/>
+            <xs:element name="valueUrl" type="url"/>
+            <xs:element name="valueDateTime" type="dateTime"/>
+            <xs:element name="valueQuantity" type="Quantity"/>
+            <xs:element name="valueRange" type="Range"/>
+            <xs:element name="valueRatio" type="Ratio"/>
+            <xs:element name="valueAnnotation" type="Annotation"/>
+            <xs:element name="valueAddress" type="Address"/>
+            <xs:element name="valueDuration" type="Duration"/>
+            <xs:element name="valueCodeableConcept" type="CodeableConcept"/>
+          </xs:choice>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="InventoryItem.Instance">
+
+    <xs:complexContent>
+      <xs:extension base="BackboneElement">
+        <xs:sequence>
+          <xs:element name="identifier" minOccurs="0" maxOccurs="unbounded" type="Identifier">
+
+          </xs:element>
+          <xs:element name="lotNumber" minOccurs="0" maxOccurs="1" type="string">
+
+          </xs:element>
+          <xs:element name="expiry" minOccurs="0" maxOccurs="1" type="dateTime">
+
+          </xs:element>
+          <xs:element name="subject" minOccurs="0" maxOccurs="1" type="Reference">
+
+          </xs:element>
+          <xs:element name="location" minOccurs="0" maxOccurs="1" type="Reference">
+
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="InventoryItemStatusCodesEnum">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="active">
+
+      </xs:enumeration>
+      <xs:enumeration value="inactive">
+
+      </xs:enumeration>
+      <xs:enumeration value="entered-in-error">
+
+      </xs:enumeration>
+      <xs:enumeration value="unknown">
+
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="InventoryItemStatusCodes">
+
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="InventoryItemStatusCodesEnum" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="CommonLanguagesEnum">
+    <xs:restriction base="code-primitive">
+      <xs:enumeration value="ar">
+
+      </xs:enumeration>
+      <xs:enumeration value="bg">
+
+      </xs:enumeration>
+      <xs:enumeration value="bg-BG">
+
+      </xs:enumeration>
+      <xs:enumeration value="bn">
+
+      </xs:enumeration>
+      <xs:enumeration value="cs">
+
+      </xs:enumeration>
+      <xs:enumeration value="cs-CZ">
+
+      </xs:enumeration>
+      <xs:enumeration value="bs">
+
+      </xs:enumeration>
+      <xs:enumeration value="bs-BA">
+
+      </xs:enumeration>
+      <xs:enumeration value="da">
+
+      </xs:enumeration>
+      <xs:enumeration value="da-DK">
+
+      </xs:enumeration>
+      <xs:enumeration value="de">
+
+      </xs:enumeration>
+      <xs:enumeration value="de-AT">
+
+      </xs:enumeration>
+      <xs:enumeration value="de-CH">
+
+      </xs:enumeration>
+      <xs:enumeration value="de-DE">
+
+      </xs:enumeration>
+      <xs:enumeration value="el">
+
+      </xs:enumeration>
+      <xs:enumeration value="el-GR">
+
+      </xs:enumeration>
+      <xs:enumeration value="en">
+
+      </xs:enumeration>
+      <xs:enumeration value="en-AU">
+
+      </xs:enumeration>
+      <xs:enumeration value="en-CA">
+
+      </xs:enumeration>
+      <xs:enumeration value="en-GB">
+
+      </xs:enumeration>
+      <xs:enumeration value="en-IN">
+
+      </xs:enumeration>
+      <xs:enumeration value="en-NZ">
+
+      </xs:enumeration>
+      <xs:enumeration value="en-SG">
+
+      </xs:enumeration>
+      <xs:enumeration value="en-US">
+
+      </xs:enumeration>
+      <xs:enumeration value="es">
+
+      </xs:enumeration>
+      <xs:enumeration value="es-AR">
+
+      </xs:enumeration>
+      <xs:enumeration value="es-ES">
+
+      </xs:enumeration>
+      <xs:enumeration value="es-UY">
+
+      </xs:enumeration>
+      <xs:enumeration value="et">
+
+      </xs:enumeration>
+      <xs:enumeration value="et-EE">
+
+      </xs:enumeration>
+      <xs:enumeration value="fi">
+
+      </xs:enumeration>
+      <xs:enumeration value="fr">
+
+      </xs:enumeration>
+      <xs:enumeration value="fr-BE">
+
+      </xs:enumeration>
+      <xs:enumeration value="fr-CH">
+
+      </xs:enumeration>
+      <xs:enumeration value="fr-FR">
+
+      </xs:enumeration>
+      <xs:enumeration value="fi-FI">
+
+      </xs:enumeration>
+      <xs:enumeration value="fr-CA">
+
+      </xs:enumeration>
+      <xs:enumeration value="fy">
+
+      </xs:enumeration>
+      <xs:enumeration value="fy-NL">
+
+      </xs:enumeration>
+      <xs:enumeration value="hi">
+
+      </xs:enumeration>
+      <xs:enumeration value="hr">
+
+      </xs:enumeration>
+      <xs:enumeration value="hr-HR">
+
+      </xs:enumeration>
+      <xs:enumeration value="is">
+
+      </xs:enumeration>
+      <xs:enumeration value="is-IS">
+
+      </xs:enumeration>
+      <xs:enumeration value="it">
+
+      </xs:enumeration>
+      <xs:enumeration value="it-CH">
+
+      </xs:enumeration>
+      <xs:enumeration value="it-IT">
+
+      </xs:enumeration>
+      <xs:enumeration value="ja">
+
+      </xs:enumeration>
+      <xs:enumeration value="ko">
+
+      </xs:enumeration>
+      <xs:enumeration value="lt">
+
+      </xs:enumeration>
+      <xs:enumeration value="lt-LT">
+
+      </xs:enumeration>
+      <xs:enumeration value="lv">
+
+      </xs:enumeration>
+      <xs:enumeration value="lv-LV">
+
+      </xs:enumeration>
+      <xs:enumeration value="nl">
+
+      </xs:enumeration>
+      <xs:enumeration value="nl-BE">
+
+      </xs:enumeration>
+      <xs:enumeration value="nl-NL">
+
+      </xs:enumeration>
+      <xs:enumeration value="no">
+
+      </xs:enumeration>
+      <xs:enumeration value="no-NO">
+
+      </xs:enumeration>
+      <xs:enumeration value="pa">
+
+      </xs:enumeration>
+      <xs:enumeration value="pl">
+
+      </xs:enumeration>
+      <xs:enumeration value="pl-PL">
+
+      </xs:enumeration>
+      <xs:enumeration value="pt">
+
+      </xs:enumeration>
+      <xs:enumeration value="pt-PT">
+
+      </xs:enumeration>
+      <xs:enumeration value="pt-BR">
+
+      </xs:enumeration>
+      <xs:enumeration value="ro">
+
+      </xs:enumeration>
+      <xs:enumeration value="ro-RO">
+
+      </xs:enumeration>
+      <xs:enumeration value="ru">
+
+      </xs:enumeration>
+      <xs:enumeration value="ru-RU">
+
+      </xs:enumeration>
+      <xs:enumeration value="sk">
+
+      </xs:enumeration>
+      <xs:enumeration value="sk-SK">
+
+      </xs:enumeration>
+      <xs:enumeration value="sl">
+
+      </xs:enumeration>
+      <xs:enumeration value="sl-SI">
+
+      </xs:enumeration>
+      <xs:enumeration value="sr">
+
+      </xs:enumeration>
+      <xs:enumeration value="sr-RS">
+
+      </xs:enumeration>
+      <xs:enumeration value="sv">
+
+      </xs:enumeration>
+      <xs:enumeration value="sv-SE">
+
+      </xs:enumeration>
+      <xs:enumeration value="te">
+
+      </xs:enumeration>
+      <xs:enumeration value="zh">
+
+      </xs:enumeration>
+      <xs:enumeration value="zh-CN">
+
+      </xs:enumeration>
+      <xs:enumeration value="zh-HK">
+
+      </xs:enumeration>
+      <xs:enumeration value="zh-SG">
+
+      </xs:enumeration>
+      <xs:enumeration value="zh-TW">
+
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="CommonLanguages">
+
+    <xs:complexContent>
+      <xs:extension base="Element">
+        <xs:attribute name="value" type="CommonLanguagesEnum" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>
