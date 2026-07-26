@@ -1,0 +1,28 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "StructureDefinition",
+        "id": "controlled-patient",
+        "url": "http://example.org/fhir/StructureDefinition/controlled-patient",
+        "name": "ControlledPatient",
+        "status": "active",
+        "kind": "resource",
+        "abstract": false,
+        "type": "Patient",
+        "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Patient",
+        "derivation": "constraint",
+        "snapshot": {
+          "element": [
+            {
+              "id": "Patient",
+              "path": "Patient"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

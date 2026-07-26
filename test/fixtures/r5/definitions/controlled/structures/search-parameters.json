@@ -1,0 +1,48 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "id": "controlled",
+        "url": "http://example.org/fhir/SearchParameter/controlled",
+        "status": "active",
+        "code": "controlled",
+        "base": [
+          "Patient"
+        ],
+        "type": "string",
+        "expression": "Patient.name"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "id": "legacy-only",
+        "url": "http://example.org/fhir/SearchParameter/legacy-only",
+        "status": "active",
+        "code": "legacy-only",
+        "base": [
+          "Patient"
+        ],
+        "type": "string",
+        "xpath": "f:Patient/f:name"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "SearchParameter",
+        "id": "extension-only",
+        "url": "http://example.org/fhir/SearchParameter/extension-only",
+        "status": "active",
+        "code": "extension-only",
+        "base": [
+          "Patient"
+        ],
+        "type": "token",
+        "expression": "Patient.extension"
+      }
+    }
+  ]
+}
