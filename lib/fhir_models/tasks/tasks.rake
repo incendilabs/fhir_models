@@ -28,7 +28,7 @@ module FHIR
           expected_checksum: FHIR::R5::DEFINITIONS_SHA256,
           search_parameter_field: 'expression'
         )
-        yield definitions
+        yield definitions, working
       ensure
         FileUtils.rm_rf(working)
       end
@@ -71,6 +71,40 @@ module FHIR
             )
           end
 
+          FileUtils.rm_rf(destination)
+          FileUtils.mv(staging, destination)
+          staging = nil
+        ensure
+          FileUtils.rm_rf(staging) if staging
+        end
+      end
+    end
+
+    def generate_r5_definitions(
+      definitions_archive:,
+      expansions_package:,
+      extensions_package:,
+      destination:,
+      temporary_root: File.join(ROOT, 'tmp')
+    )
+      with_r5_definitions(
+        definitions_archive: definitions_archive,
+        expansions_package: expansions_package,
+        temporary_root: temporary_root
+      ) do |definitions, working|
+        extensions = File.join(working, 'extension-definitions.json')
+        FHIR::Boot::ExtensionPackage.r5(extensions_package).write(extensions)
+
+        destination = File.expand_path(destination, ROOT)
+        parent = File.dirname(destination)
+        FileUtils.mkdir_p(parent)
+        staging = Dir.mktmpdir(".#{File.basename(destination)}-", parent)
+
+        begin
+          definitions.write_runtime_artifacts(
+            staging,
+            extension_definitions: extensions
+          )
           FileUtils.rm_rf(destination)
           FileUtils.mv(staging, destination)
           staging = nil
@@ -158,6 +192,49 @@ namespace :fhir do
       definitions_archive: definitions,
       expansions_package: expansions,
       destination: destination
+    )
+  end
+
+  desc 'generate R5 runtime definitions from official definition and package sources'
+  task :generate_r5_definitions,
+       [:definitions, :expansions, :extensions, :destination] do |_t, args|
+    definitions = args[:definitions]
+    expansions = args[:expansions]
+    extensions = args[:extensions]
+    destination = args[:destination] || File.join('lib', 'fhir_models', 'definitions', 'r5')
+    raise ArgumentError, 'Provide the R5 definitions archive path' if definitions.nil? || definitions.empty?
+    raise ArgumentError, 'Provide the R5 expansions package path' if expansions.nil? || expansions.empty?
+    raise ArgumentError, 'Provide the R5 extensions package path' if extensions.nil? || extensions.empty?
+
+    FHIR::Tasks.generate_r5_definitions(
+      definitions_archive: definitions,
+      expansions_package: expansions,
+      extensions_package: extensions,
+      destination: destination
+    )
+  end
+
+  desc 'generate R5 models and runtime definitions from official sources'
+  task :generate_r5,
+       [:definitions, :expansions, :extensions, :model_destination, :definition_destination] do |_t, args|
+    definitions = args[:definitions]
+    expansions = args[:expansions]
+    extensions = args[:extensions]
+    raise ArgumentError, 'Provide the R5 definitions archive path' if definitions.nil? || definitions.empty?
+    raise ArgumentError, 'Provide the R5 expansions package path' if expansions.nil? || expansions.empty?
+    raise ArgumentError, 'Provide the R5 extensions package path' if extensions.nil? || extensions.empty?
+
+    FHIR::Tasks.generate_r5_models(
+      definitions_archive: definitions,
+      expansions_package: expansions,
+      destination: args[:model_destination] || File.join('lib', 'fhir_models', 'r5')
+    )
+    FHIR::Tasks.generate_r5_definitions(
+      definitions_archive: definitions,
+      expansions_package: expansions,
+      extensions_package: extensions,
+      destination: args[:definition_destination] ||
+        File.join('lib', 'fhir_models', 'definitions', 'r5')
     )
   end
 
