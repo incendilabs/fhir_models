@@ -133,8 +133,11 @@ module FHIR
     def self.validate(xml, schema_root = nil)
       schema_root ||= File.expand_path '../definitions/schema', File.dirname(File.absolute_path(__FILE__))
       schema = File.join(schema_root, 'fhir-all.xsd')
+      raise ArgumentError, "FHIR XML schema not found: #{schema}" unless File.file?(schema)
+
       xsd = Nokogiri::XML::Schema(File.new(schema))
-      xsd.validate(Nokogiri::XML(xml))
+      document = Nokogiri::XML(xml)
+      document.errors + xsd.validate(document)
     end
 
     private :hash_to_xml_node
