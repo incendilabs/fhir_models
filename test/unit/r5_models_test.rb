@@ -131,6 +131,27 @@ class R5ModelsTest < Test::Unit::TestCase
     assert_false FHIR::R5.primitive?(datatype: 'integer64', value: value + 1)
   end
 
+  def test_required_external_binding_fallbacks_validate_local_r5_codes
+    binary = FHIR::R5::Binary.new(
+      language: 'no-NO',
+      contentType: 'application/fhir+json',
+      data: 'dGVzdA=='
+    )
+    sampled_data = FHIR::R5::SampledData.new(
+      origin: FHIR::R5::Quantity.new(value: 1),
+      intervalUnit: 's',
+      dimensions: 1
+    )
+
+    assert_empty binary.validate
+    assert_empty sampled_data.validate
+
+    binary.language = 'not_a_language'
+    sampled_data.intervalUnit = 'not-a-unit'
+    assert_not_empty binary.validate.fetch('language')
+    assert_not_empty sampled_data.validate.fetch('intervalUnit')
+  end
+
   def test_bundle_entries_and_contained_resources_stay_in_r5
     bundle = FHIR::R5.from_contents(
       JSON.generate(
