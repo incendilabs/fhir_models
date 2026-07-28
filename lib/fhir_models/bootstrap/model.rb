@@ -291,9 +291,24 @@ module FHIR
         json_or_xml = value.downcase.include?('xml') || value.downcase.include?('json')
         known_weird = ['text/cql', 'application/cql+text', 'application/hl7-v2'].include?(value)
         valid = json_or_xml || known_weird || (!matches.nil? && !matches.empty?)
-      elsif uri == 'http://hl7.org/fhir/ValueSet/languages' || uri == 'http://tools.ietf.org/html/bcp47'
+      elsif [
+        'http://hl7.org/fhir/ValueSet/all-languages',
+        'http://hl7.org/fhir/ValueSet/languages',
+        'http://tools.ietf.org/html/bcp47'
+      ].include?(uri)
+        selectable_languages = fhir_definitions.get_codes(
+          'http://hl7.org/fhir/ValueSet/languages'
+        )
+        locally_selectable = selectable_languages.to_h.values.flatten.include?(value)
         has_region = !(value =~ /-/).nil?
-        valid = !BCP47::Language.identify(value.downcase).nil? && (!has_region || !BCP47::Region.identify(value.upcase).nil?)
+        recognized = !BCP47::Language.identify(value.downcase).nil? &&
+                     (!has_region || !BCP47::Region.identify(value.upcase).nil?)
+        valid = locally_selectable || recognized
+      elsif uri == 'http://hl7.org/fhir/ValueSet/ucum-units'
+        units_of_time = fhir_definitions.get_codes(
+          'http://hl7.org/fhir/ValueSet/units-of-time'
+        )
+        valid = units_of_time.to_h.values.flatten.include?(value)
       elsif valueset.nil?
         FHIR.logger.warn "Unable to check_binding_uri on unknown ValueSet: #{uri}"
       else
