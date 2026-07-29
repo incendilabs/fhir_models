@@ -15,6 +15,7 @@ module FHIR
             hash[key][index] = item.to_hash if item.respond_to?(:to_hash)
           end
         end
+        hash[key] = serialize_primitive(hash[key], value)
       end
       hash = prune_model_hash(hash)
       merge_primitive_extensions(hash)
@@ -188,6 +189,12 @@ module FHIR
       end
     end
 
+    def serialize_primitive(value, metadata)
+      return value unless metadata['type'] == 'integer64' && fhir_namespace == FHIR::R5
+
+      value.is_a?(Array) ? value.map(&:to_s) : value.to_s
+    end
+
     def make_child(child, klass)
       return child if child.is_a?(FHIR::Model)
 
@@ -233,6 +240,7 @@ module FHIR
     private :prune, :make_child, :convert_primitive, :fhir_namespace,
             :extract_primitive_extensions, :inflate_primitive_extension,
             :merge_primitive_extensions, :serialize_primitive_extension,
+            :serialize_primitive,
             :prune_model_hash, :prune_input_hash
   end
 end

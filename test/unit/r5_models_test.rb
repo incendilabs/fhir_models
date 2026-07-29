@@ -116,19 +116,30 @@ class R5ModelsTest < Test::Unit::TestCase
     value = 9_223_372_036_854_775_807
     json = JSON.generate(
       'resourceType' => 'Parameters',
-      'parameter' => [{ 'name' => 'large', 'valueInteger64' => value }]
+      'parameter' => [{ 'name' => 'large', 'valueInteger64' => value.to_s }]
     )
 
     resource = FHIR::R5.from_contents(json)
     assert_instance_of Integer, resource.parameter.first.valueInteger64
     assert_equal value, resource.parameter.first.valueInteger64
-    assert_equal value, JSON.parse(resource.to_json).dig('parameter', 0, 'valueInteger64')
+    assert_equal value.to_s, JSON.parse(resource.to_json).dig('parameter', 0, 'valueInteger64')
 
     reparsed = FHIR::R5.from_contents(resource.to_xml)
     assert_instance_of Integer, reparsed.parameter.first.valueInteger64
     assert_equal value, reparsed.parameter.first.valueInteger64
     assert_true FHIR::R5.primitive?(datatype: 'integer64', value: value)
     assert_false FHIR::R5.primitive?(datatype: 'integer64', value: value + 1)
+  end
+
+  def test_integer64_attachment_size_serializes_as_a_json_string
+    patient = FHIR::R5::Patient.new(
+      photo: [FHIR::R5::Attachment.new(size: 9_223_372_036_854_775_807)]
+    )
+    json = patient.to_json
+
+    assert_equal '9223372036854775807', JSON.parse(json).dig('photo', 0, 'size')
+    assert_equal 9_223_372_036_854_775_807,
+                 FHIR::R5::Json.from_json(json).photo.first.size
   end
 
   def test_required_external_binding_fallbacks_validate_local_r5_codes
