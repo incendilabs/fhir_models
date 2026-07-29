@@ -66,15 +66,15 @@
         "parameter": [
           {
             "name": "minimum",
-            "valueInteger64": -9223372036854775808
+            "valueInteger64": "-9223372036854775808"
           },
           {
             "name": "typical",
-            "valueInteger64": 42
+            "valueInteger64": "42"
           },
           {
             "name": "maximum",
-            "valueInteger64": 9223372036854775807
+            "valueInteger64": "9223372036854775807"
           }
         ]
       }
