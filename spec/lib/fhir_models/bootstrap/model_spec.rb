@@ -96,4 +96,12 @@ RSpec.describe 'FHIR::Model' do
       expect(range.low.value).to equal(18)
     end
   end
+
+  describe '#method_missing' do
+    it 'resolves polymorphic fields without mutating type metadata' do
+      observation = FHIR::Observation.new(valueQuantity: { value: 1 })
+
+      expect(observation.value).to be_a(FHIR::Quantity)
+    end
+  end
 end
