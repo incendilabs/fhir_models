@@ -283,7 +283,7 @@ module FHIR
     def check_binding_uri(uri, value)
       valid = false
       # Strip off the |4.0.0 or |4.0.1 or |2014-03-26 or similar from the ends of URLs
-      uri&.gsub!(/\|[A-Za-z0-9\.\-]*/, '')
+      uri = uri&.gsub(/\|[A-Za-z0-9\.\-]*/, '')
       valueset = fhir_definitions.get_codes(uri)
 
       if uri == 'http://hl7.org/fhir/ValueSet/mimetypes' || uri == 'http://www.rfc-editor.org/bcp/bcp13.txt'
