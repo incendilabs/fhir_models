@@ -33,8 +33,8 @@ module FHIR
     def method_missing(method, *_args, &_block)
       if defined?(self.class::MULTIPLE_TYPES) && self.class::MULTIPLE_TYPES[method.to_s]
         self.class::MULTIPLE_TYPES[method.to_s].each do |type|
-          type[0] = type[0].upcase
-          value = send("#{method}#{type}".to_sym)
+          type_name = type[0].upcase + type[1..]
+          value = send("#{method}#{type_name}".to_sym)
           return value unless value.nil?
         end
         return nil
