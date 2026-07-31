@@ -18,7 +18,7 @@ module FHIR
         klass = namespace.const_get(resource_type)
         resource = klass.new(hash)
       rescue => ex
-        FHIR.logger.error("Failed to deserialize JSON:\n#{ex.backtrace}")
+        FHIR.logger.debug("Failed to deserialize JSON:\n#{ex.backtrace}")
         FHIR.logger.debug("JSON:\n#{json}")
         resource = nil
       end

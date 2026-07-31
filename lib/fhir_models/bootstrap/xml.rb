@@ -135,7 +135,7 @@ module FHIR
         hash = xml_node_to_hash(doc.root, namespace, klass)
         resource = klass.new(hash)
       rescue => ex
-        FHIR.logger.error("Failed to deserialize XML:\n#{ex.backtrace}")
+        FHIR.logger.debug("Failed to deserialize XML:\n#{ex.backtrace}")
         FHIR.logger.debug("XML:\n#{xml}")
         resource = nil
       end
