@@ -1,16 +1,21 @@
 inherit_from: .rubocop_todo.yml
 AllCops:
-  TargetRubyVersion: 2.4
+  TargetRubyVersion: 3.4
+  SuggestExtensions: false
   Exclude:
     - 'test/**/*'
     - 'spec/**/*'
     - 'lib/fhir_models/fhir/**/*'
+    - 'lib/fhir_models/r4b/resources/**/*'
+    - 'lib/fhir_models/r4b/types/**/*'
+    - 'lib/fhir_models/r5/resources/**/*'
+    - 'lib/fhir_models/r5/types/**/*'
     - 'lib/fhir_models/fhirpath/evaluate.rb'
     - 'lib/**/*.rake'
     - 'tmp/**/*'
     - '*.gemspec'
     - 'bin/*'
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 Style/FrozenStringLiteralComment:
   Enabled: false
